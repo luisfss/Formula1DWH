@@ -1,0 +1,150 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: db_course_ls
+    schema: bronze
+    description: "Raw ingested data from OpenF1 API — Bronze layer Delta tables"
+
+    tables:
+      - name: openf1_drivers
+        description: "Raw driver data ingested from OpenF1 /v1/drivers endpoint"
+        columns:
+          - name: driver_number
+            description: "Unique race number assigned to the driver"
+          - name: broadcast_name
+            description: "Name used during live broadcasts"
+          - name: full_name
+            description: "Driver's full legal name"
+          - name: name_acronym
+            description: "Three-letter driver code (e.g. VER, HAM)"
+          - name: team_name
+            description: "Constructor / team name"
+          - name: team_colour
+            description: "Hex colour associated with the team"
+          - name: first_name
+            description: "Driver first name"
+          - name: last_name
+            description: "Driver last name"
+          - name: headshot_url
+            description: "URL to driver headshot image"
+          - name: country_code
+            description: "Three-letter ISO country code"
+          - name: session_key
+            description: "Session key from OpenF1 for this driver record"
+          - name: meeting_key
+            description: "Meeting key from OpenF1 for this driver record"
+          - name: season
+            description: "Season year added at ingestion time"
+          - name: ingest_timestamp
+            description: "Timestamp when the record was ingested"
+
+      - name: openf1_sessions
+        description: "Raw session metadata ingested from OpenF1 /v1/sessions endpoint"
+        columns:
+          - name: session_key
+            description: "Unique session identifier"
+          - name: session_name
+            description: "Session name (Race, Qualifying, FP1, etc.)"
+          - name: session_type
+            description: "Session type category"
+          - name: date_start
+            description: "Session start datetime (UTC)"
+          - name: date_end
+            description: "Session end datetime (UTC)"
+          - name: gmt_offset
+            description: "Timezone offset from GMT"
+          - name: location
+            description: "Circuit location / city"
+          - name: country_key
+            description: "Country numeric key"
+          - name: country_code
+            description: "Three-letter country code"
+          - name: country_name
+            description: "Full country name"
+          - name: circuit_key
+            description: "Circuit numeric key"
+          - name: circuit_short_name
+            description: "Short name of the circuit"
+          - name: meeting_key
+            description: "Meeting key (groups sessions of the same race weekend)"
+          - name: year
+            description: "Championship year"
+          - name: ingest_timestamp
+            description: "Timestamp when the record was ingested"
+
+      - name: openf1_laps
+        description: "Raw lap timing data ingested from OpenF1 /v1/laps endpoint"
+        columns:
+          - name: session_key
+            description: "Session identifier"
+          - name: driver_number
+            description: "Driver race number"
+          - name: lap_number
+            description: "Lap number within the session"
+          - name: lap_duration
+            description: "Total lap time in seconds"
+          - name: duration_sector_1
+            description: "Sector 1 time in seconds"
+          - name: duration_sector_2
+            description: "Sector 2 time in seconds"
+          - name: duration_sector_3
+            description: "Sector 3 time in seconds"
+          - name: i1_speed
+            description: "Speed trap 1 in km/h"
+          - name: i2_speed
+            description: "Speed trap 2 in km/h"
+          - name: st_speed
+            description: "Finish straight speed trap in km/h"
+          - name: is_pit_out_lap
+            description: "Boolean — true if driver exited pit lane on this lap"
+          - name: date_start
+            description: "Timestamp when the lap started"
+          - name: meeting_key
+            description: "Meeting key for this lap"
+          - name: ingest_timestamp
+            description: "Timestamp when the record was ingested"
+
+      - name: openf1_pit
+        description: "Raw pit stop data ingested from OpenF1 /v1/pit endpoint"
+        columns:
+          - name: session_key
+            description: "Session identifier"
+          - name: driver_number
+            description: "Driver race number"
+          - name: lap_number
+            description: "Lap on which the pit stop occurred"
+          - name: pit_duration
+            description: "Total time spent in pit lane (seconds)"
+          - name: stop_duration
+            description: "Stationary time in the pit box (seconds)"
+          - name: lane_duration
+            description: "Time driving through the pit lane (seconds)"
+          - name: date
+            description: "Timestamp of the pit stop event"
+          - name: meeting_key
+            description: "Meeting key for this pit stop"
+          - name: ingest_timestamp
+            description: "Timestamp when the record was ingested"
+
+      - name: openf1_stints
+        description: "Raw tyre stint data ingested from OpenF1 /v1/stints endpoint"
+        columns:
+          - name: session_key
+            description: "Session identifier"
+          - name: driver_number
+            description: "Driver race number"
+          - name: stint_number
+            description: "Sequential stint number for this driver"
+          - name: lap_start
+            description: "First lap of the stint"
+          - name: lap_end
+            description: "Last lap of the stint"
+          - name: compound
+            description: "Tyre compound (SOFT, MEDIUM, HARD, INTERMEDIATE, WET)"
+          - name: tyre_age_at_start
+            description: "Age of the tyre at the start of the stint (laps)"
+          - name: meeting_key
+            description: "Meeting key for this stint"
+          - name: ingest_timestamp
+            description: "Timestamp when the record was ingested"

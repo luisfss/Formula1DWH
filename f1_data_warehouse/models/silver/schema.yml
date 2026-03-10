@@ -1,0 +1,128 @@
+version: 2
+
+models:
+  - name: dim_drivers
+    description: >
+      Cleaned and deduplicated driver dimension.
+      One row per driver per season, sourced from the OpenF1 drivers Bronze table.
+    columns:
+      - name: driver_sk
+        description: "Surrogate key — MD5 hash of driver_number + season"
+        tests:
+          - unique
+          - not_null
+      - name: driver_number
+        description: "Driver's race number"
+        tests:
+          - not_null
+      - name: season
+        description: "Championship year"
+        tests:
+          - not_null
+      - name: driver_code
+        description: "Three-letter driver code (e.g. VER)"
+        tests:
+          - not_null
+      - name: team_name
+        description: "Constructor / team name"
+        tests:
+          - not_null
+
+  - name: dim_sessions
+    description: >
+      Cleaned session dimension covering all session types across race weekends.
+      One row per session_key.
+    columns:
+      - name: session_sk
+        description: "Surrogate key — MD5 hash of session_key"
+        tests:
+          - unique
+          - not_null
+      - name: session_key
+        description: "OpenF1 session identifier"
+        tests:
+          - unique
+          - not_null
+      - name: season
+        description: "Championship year"
+        tests:
+          - not_null
+      - name: session_type
+        description: "Session type (Race, Qualifying, etc.)"
+        tests:
+          - not_null
+      - name: is_race_session
+        description: "Boolean flag for race sessions"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+  - name: fct_race_results
+    description: >
+      Race-level fact table with one row per driver per race session.
+      Aggregates lap metrics, pit stop data, and enriches with driver/session context.
+    columns:
+      - name: race_result_sk
+        description: "Surrogate key — MD5 hash of session_key + driver_number"
+        tests:
+          - unique
+          - not_null
+      - name: session_key
+        description: "FK to dim_sessions"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_sessions')
+              field: session_key
+      - name: driver_sk
+        description: "FK to dim_drivers"
+        tests:
+          - not_null
+      - name: laps_completed
+        description: "Total number of laps completed by the driver"
+        tests:
+          - not_null
+      - name: total_pit_stops
+        description: "Number of pit stops taken"
+        tests:
+          - not_null
+      - name: best_lap_time_s
+        description: "Fastest lap time in seconds"
+
+  - name: fct_lap_times
+    description: >
+      Granular lap-level fact table — one row per driver per lap per session.
+      Includes timing, sector splits, speed traps, and tyre information.
+    columns:
+      - name: lap_sk
+        description: "Surrogate key — MD5 hash of session_key + driver_number + lap_number"
+        tests:
+          - unique
+          - not_null
+      - name: session_key
+        description: "FK to dim_sessions"
+        tests:
+          - not_null
+      - name: driver_number
+        description: "Driver race number"
+        tests:
+          - not_null
+      - name: lap_number
+        description: "Lap number within the session"
+        tests:
+          - not_null
+      - name: lap_time_s
+        description: "Lap duration in seconds"
+      - name: tyre_compound
+        description: "Tyre compound used on this lap"
+        tests:
+          - accepted_values:
+              values: ['SOFT', 'MEDIUM', 'HARD', 'INTERMEDIATE', 'WET']
+              severity: warn
+      - name: is_clean_lap
+        description: "Flag for representative laps (no pit-out, within 110% of driver avg)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
